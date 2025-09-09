@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "test:unit": "jest tests/unit/",
+    "test:contract": "jest tests/contract/",
+    "test:e2e": "playwright test tests/e2e/",
+    "test:all": "npm run test:unit && npm run test:contract && npm run test:e2e"
+  }
+}

@@ -1,0 +1,272 @@
+openapi: 3.0.3
+info:
+  title: Next.js Caching Showcase API
+  description: API endpoints for demonstrating Next.js 15 caching features
+  version: 1.0.0
+
+paths:
+  /api/cache/methods:
+    get:
+      summary: Get all available caching methods
+      description: Returns list of all caching strategies available for demonstration
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CachingMethod'
+
+  /api/cache/methods/{methodId}:
+    get:
+      summary: Get specific caching method details
+      description: Returns detailed information about a specific caching method
+      parameters:
+        - in: path
+          name: methodId
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the caching method
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CachingMethod'
+        '404':
+          description: Caching method not found
+
+  /api/cache/methods/{methodId}/refresh:
+    post:
+      summary: Refresh cache for specific method
+      description: Invalidates and refreshes the cache for a specific caching method demo
+      parameters:
+        - in: path
+          name: methodId
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the caching method
+      responses:
+        '200':
+          description: Cache refreshed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoInteraction'
+        '404':
+          description: Caching method not found
+        '500':
+          description: Cache refresh failed
+
+  /api/cache/methods/{methodId}/status:
+    get:
+      summary: Get cache status for specific method
+      description: Returns current cache state and performance metrics
+      parameters:
+        - in: path
+          name: methodId
+          required: true
+          schema:
+            type: string
+          description: Unique identifier for the caching method
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CacheStatus'
+        '404':
+          description: Caching method not found
+
+  /api/demo-data/{endpoint}:
+    get:
+      summary: Demo data endpoints with caching
+      description: Various endpoints that demonstrate different caching behaviors
+      parameters:
+        - in: path
+          name: endpoint
+          required: true
+          schema:
+            type: string
+            enum: [fast, slow, dynamic, static]
+          description: Type of demo data endpoint
+        - in: query
+          name: delay
+          schema:
+            type: integer
+            minimum: 0
+            maximum: 5000
+          description: Artificial delay in milliseconds for demo purposes
+      responses:
+        '200':
+          description: Demo data response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DemoData'
+
+components:
+  schemas:
+    CachingMethod:
+      type: object
+      required:
+        - id
+        - name
+        - type
+        - description
+        - betaFeature
+        - demoPath
+      properties:
+        id:
+          type: string
+          description: Unique identifier
+          example: "static-generation"
+        name:
+          type: string
+          description: Display name
+          example: "Static Generation"
+        type:
+          type: string
+          enum: [page, api, component, function, data]
+          description: Category of caching method
+        description:
+          type: string
+          description: Brief explanation of the caching method
+        betaFeature:
+          type: boolean
+          description: Whether this uses Next.js 15 beta features
+        demoPath:
+          type: string
+          description: URL path to the demo page
+          example: "/demos/static-generation"
+        codeExample:
+          type: string
+          description: Code snippet showing implementation
+        benefits:
+          type: array
+          items:
+            type: string
+          description: List of performance benefits
+        useCases:
+          type: array
+          items:
+            type: string
+          description: When to use this caching method
+
+    DemoInteraction:
+      type: object
+      required:
+        - id
+        - methodId
+        - actionType
+        - timestamp
+        - cacheState
+      properties:
+        id:
+          type: string
+          description: Unique identifier
+        methodId:
+          type: string
+          description: Reference to CachingMethod.id
+        actionType:
+          type: string
+          enum: [view, refresh, invalidate, revalidate]
+          description: Type of action performed
+        timestamp:
+          type: string
+          format: date-time
+          description: When the action occurred
+        cacheState:
+          type: string
+          enum: [hit, miss, stale, fresh, error]
+          description: State of cache before action
+        result:
+          type: object
+          description: Result of the action
+        performanceMetrics:
+          $ref: '#/components/schemas/PerformanceMetrics'
+
+    PerformanceMetrics:
+      type: object
+      properties:
+        loadTime:
+          type: number
+          description: Time to load content in milliseconds
+          minimum: 0
+        cacheHitRate:
+          type: number
+          description: Percentage of cache hits
+          minimum: 0
+          maximum: 100
+        dataSize:
+          type: number
+          description: Size of cached data in bytes
+          minimum: 0
+        revalidationTime:
+          type: number
+          description: Time for cache revalidation in milliseconds
+          minimum: 0
+        ttl:
+          type: number
+          nullable: true
+          description: Time to live for cached data in seconds
+          minimum: 0
+
+    CacheStatus:
+      type: object
+      required:
+        - methodId
+        - state
+        - lastUpdated
+      properties:
+        methodId:
+          type: string
+          description: Reference to CachingMethod.id
+        state:
+          type: string
+          enum: [hit, miss, stale, fresh, error]
+          description: Current cache state
+        lastUpdated:
+          type: string
+          format: date-time
+          description: When cache was last updated
+        ttl:
+          type: number
+          nullable: true
+          description: Remaining time to live in seconds
+        size:
+          type: number
+          description: Current cache size in bytes
+        hitCount:
+          type: number
+          description: Number of cache hits
+        missCount:
+          type: number
+          description: Number of cache misses
+
+    DemoData:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Unique identifier for this data
+        content:
+          type: string
+          description: Demo content
+        timestamp:
+          type: string
+          format: date-time
+          description: When this data was generated
+        cached:
+          type: boolean
+          description: Whether this response was served from cache
+        cacheAge:
+          type: number
+          nullable: true
+          description: Age of cached data in seconds

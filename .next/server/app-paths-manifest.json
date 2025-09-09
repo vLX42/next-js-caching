@@ -1,0 +1,8 @@
+{
+  "/api/demos/function-cache/status/route": "app/api/demos/function-cache/status/route.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js",
+  "/demos/function-cache/page": "app/demos/function-cache/page.js",
+  "/demos/streaming-ssr/page": "app/demos/streaming-ssr/page.js",
+  "/demos/api-routes/page": "app/demos/api-routes/page.js"
+}
