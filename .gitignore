@@ -39,6 +39,6 @@ next-env.d.ts
 /.swc/
 
 # Development/Internal folders
-/.github/prompts/
+/.github
 
 # Keep .github/copilot-instructions.md but ignore prompts folder
