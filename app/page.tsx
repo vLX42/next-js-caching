@@ -64,7 +64,7 @@ export default function HomePage() {
         </p>
         <div className="getting-started-content">
           <div>
-            <h3>What You'll Learn</h3>
+            <h3>What You&apos;ll Learn</h3>
             <ul>
               <li>• When to use each caching strategy</li>
               <li>• Performance impact measurements</li>

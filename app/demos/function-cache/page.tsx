@@ -80,7 +80,7 @@ export default async function FunctionCacheDemo() {
           </div>
           
           <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '16px' }}>
-            This expensive computation is cached using Next.js 15's unstable_cache function.
+            This expensive computation is cached using Next.js 15&apos;s unstable_cache function.
             The result is cached for 60 seconds, making subsequent calls instant.
           </p>
 
