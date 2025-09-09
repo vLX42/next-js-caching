@@ -4,11 +4,11 @@ import { CachePerformanceMonitor } from '@/lib/cache-utils';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { methodId: string } }
+  { params }: { params: Promise<{ methodId: string }> }
 ) {
   try {
     const startTime = performance.now();
-    const { methodId } = params;
+    const { methodId } = await params;
     
     // Get specific caching method
     const method = getCachingMethodById(methodId);
@@ -41,10 +41,11 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error(`Error fetching caching method ${params.methodId}:`, error);
+    const { methodId } = await params;
+    console.error(`Error fetching caching method ${methodId}:`, error);
     
     // Record cache miss due to error
-    CachePerformanceMonitor.recordMiss(`cache-method-${params.methodId}`, 0);
+    CachePerformanceMonitor.recordMiss(`cache-method-${methodId}`, 0);
     
     return NextResponse.json(
       { error: 'Failed to fetch caching method' },
