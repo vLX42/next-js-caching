@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 interface CacheStatusProps {
   endpoint: string;
@@ -20,7 +20,7 @@ export function CacheStatus({ endpoint, label, method = 'cache' }: CacheStatusPr
   const [cacheInfo, setCacheInfo] = useState<CacheInfo | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const checkCacheStatus = async () => {
+  const checkCacheStatus = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`${endpoint}/status`);
@@ -44,13 +44,13 @@ export function CacheStatus({ endpoint, label, method = 'cache' }: CacheStatusPr
     } finally {
       setLoading(false);
     }
-  };
+  }, [endpoint, method]);
 
   useEffect(() => {
     checkCacheStatus();
     const interval = setInterval(checkCacheStatus, 5000); // Check every 5 seconds
     return () => clearInterval(interval);
-  }, [endpoint]);
+  }, [endpoint, checkCacheStatus]);
 
   const getStatusColor = (status: string) => {
     switch (status) {
