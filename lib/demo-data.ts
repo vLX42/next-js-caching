@@ -161,24 +161,23 @@ await revalidateTag('user-data');`,
     id: 'function-cache',
     name: 'Function-Level Caching',
     type: 'function',
-    description: 'Cache expensive function calls using unstable_cache() for granular control.',
+    description: 'Cache expensive function calls using the "use cache" directive for granular control.',
     betaFeature: true,
     demoPath: '/demos/function-cache',
-    codeExample: `import { unstable_cache } from 'next/cache';
+    codeExample: `async function expensiveCalculation(input: string) {
+  "use cache";
+  
+  // Expensive operation
+  return performComplexCalculation(input);
+}
 
-const expensiveCalculation = unstable_cache(
-  async (input: string) => {
-    // Expensive operation
-    return performComplexCalculation(input);
-  },
-  ['calculation'], // cache key
-  { revalidate: 3600 } // 1 hour TTL
-);`,
+// Function is automatically cached when called
+const result = await expensiveCalculation("data");`,
     benefits: [
       'Cache specific functions',
-      'Configurable TTL',
+      'Automatic cache management',
       'Memory efficient',
-      'Easy invalidation'
+      'Future-proof syntax'
     ],
     useCases: [
       'Complex calculations',

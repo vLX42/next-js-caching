@@ -3,14 +3,16 @@ import { PerformanceTracker } from '@/lib/performance';
 import type { CachingMethod } from '@/lib/models/caching-method';
 
 describe('Demo Data Functions', () => {
-  test('getAllCachingMethods returns all 8 methods', () => {
+  test('getAllCachingMethods returns all 10 methods', () => {
     const methods = getAllCachingMethods();
-    expect(methods).toHaveLength(8);
+    expect(methods).toHaveLength(10);
     
     const expectedMethods = [
       'static-generation',
       'server-components', 
       'api-routes',
+      'use-cache-directive',
+      'cache-tags',
       'function-cache',
       'fetch-cache',
       'isr',
@@ -28,7 +30,7 @@ describe('Demo Data Functions', () => {
     expect(method).toBeDefined();
     expect(method?.id).toBe('function-cache');
     expect(method?.name).toBe('Function-Level Caching');
-    expect(method?.description).toContain('unstable_cache');
+    expect(method?.description).toContain('use cache');
   });
 
   test('getCachingMethodById returns undefined for invalid id', () => {

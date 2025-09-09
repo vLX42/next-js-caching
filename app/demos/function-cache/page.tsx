@@ -4,10 +4,11 @@ import { PerformanceMetrics } from '@/components/performance-metrics';
 import { CacheRefreshButton } from '@/components/cache-refresh-button';
 import { CodeExample } from '@/components/code-example';
 import { CacheStatus } from '@/components/cache-status';
-import { unstable_cache } from 'next/cache';
 
-// Expensive computation that we want to cache
+// Expensive computation that we want to cache using "use cache" directive
 async function expensiveComputation(input: string) {
+  "use cache";
+  
   console.log('Running expensive computation for:', input);
   // Simulate expensive operation
   await new Promise(resolve => setTimeout(resolve, 200));
@@ -21,21 +22,11 @@ async function expensiveComputation(input: string) {
   };
 }
 
-// Cache the expensive function
-const cachedComputation = unstable_cache(
-  expensiveComputation,
-  ['expensive-computation'], // cache key
-  { 
-    revalidate: 60, // Cache for 60 seconds
-    tags: ['computation'] // Cache tags for selective invalidation
-  }
-);
-
 export default async function FunctionCacheDemo() {
   const method = getCachingMethodById('function-cache');
   
-  // This will be cached after the first call
-  const computationResult = await cachedComputation('next-js-caching-demo');
+  // This will be cached after the first call using "use cache" directive
+  const computationResult = await expensiveComputation('next-js-caching-demo');
   
   if (!method) {
     return <div>Method not found</div>;
@@ -80,8 +71,8 @@ export default async function FunctionCacheDemo() {
           </div>
           
           <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '16px' }}>
-            This expensive computation is cached using Next.js 15&apos;s unstable_cache function.
-            The result is cached for 60 seconds, making subsequent calls instant.
+            This expensive computation is cached using Next.js 15&apos;s &quot;use cache&quot; directive.
+            The result is cached automatically, making subsequent calls instant.
           </p>
 
           <CacheRefreshButton methodId="function-cache" />
@@ -89,7 +80,7 @@ export default async function FunctionCacheDemo() {
           <CacheStatus 
             endpoint="/api/demos/function-cache"
             label="Function Cache Status"
-            method="unstable_cache"
+            method="use-cache"
           />
         </div>
       </div>

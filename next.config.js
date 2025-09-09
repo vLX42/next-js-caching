@@ -2,7 +2,7 @@
 const nextConfig = {
   experimental: {
     // Enable newest Next.js 15 caching features
-    useCache: true,           // Enable 'use cache' directive (future replacement for unstable_cache)
+    useCache: true,           // Enable 'use cache' directive (replacement for unstable_cache)
     cacheComponents: true,    // Enable component-level caching
     cacheLife: {
       // Custom cache profiles for different use cases

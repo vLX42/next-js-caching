@@ -95,7 +95,7 @@ test.describe('Next.js Caching Showcase', () => {
     const functionCacheResponse = await request.get('http://localhost:3000/api/demos/function-cache/status');
     expect(functionCacheResponse.ok()).toBeTruthy();
     const functionCacheStatus = await functionCacheResponse.json();
-    expect(functionCacheStatus).toHaveProperty('method', 'unstable_cache');
+    expect(functionCacheStatus).toHaveProperty('method', 'use-cache');
   });
 
   test('navigation between demos works', async ({ page }) => {

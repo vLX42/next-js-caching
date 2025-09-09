@@ -38,7 +38,7 @@ A comprehensive demonstration of **cutting-edge** caching strategies available i
 4. **Static Generation** - Pre-rendered pages at build time
 5. **Server Components** - React Server Components with caching
 6. **API Route Caching** - HTTP caching for API endpoints
-7. **Function-Level Caching** - `unstable_cache()` for expensive operations
+7. **Function-Level Caching** - `"use cache"` directive for expensive operations
 8. **Incremental Static Regeneration (ISR)** - Background revalidation
 9. **Dynamic Route Caching** - Cache dynamic routes with parameters
 10. **Streaming SSR** - Server-side rendering with progressive loading
@@ -210,16 +210,15 @@ const fresh = await fetch('/api/data'); // Always fresh in v15
 
 ### Function-Level Caching
 ```typescript
-import { unstable_cache } from 'next/cache';
+async function expensiveCalculation(input: string) {
+  "use cache";
+  
+  // Expensive computation
+  return processData(input);
+}
 
-const cachedFunction = unstable_cache(
-  async (input: string) => {
-    // Expensive computation
-    return processData(input);
-  },
-  ['cache-key'],
-  { revalidate: 60 }
-);
+// Function is automatically cached when called
+const result = await expensiveCalculation("data");
 ```
 
 ### ISR with Background Revalidation
@@ -284,7 +283,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## ⚡ Next.js 15 Features Used
 
-- **unstable_cache**: Function-level caching
+- **"use cache"**: Function-level caching
 - **Server Components**: Enhanced caching
 - **fetch() cache**: Improved request caching
 - **Incremental Static Regeneration**: Background revalidation
