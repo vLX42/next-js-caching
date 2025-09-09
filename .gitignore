@@ -34,3 +34,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# SWC
+/.swc/
+
+# Development/Internal folders
+/.github/prompts/
+
+# Keep .github/copilot-instructions.md but ignore prompts folder
