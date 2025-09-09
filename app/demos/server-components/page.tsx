@@ -6,6 +6,7 @@ import { CodeExample } from '@/components/code-example';
 
 // Server Component that runs on the server
 async function ServerDataComponent() {
+  "use cache";
   // This runs on the server and is cached
   await new Promise(resolve => setTimeout(resolve, 50));
   

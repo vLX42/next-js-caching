@@ -6,6 +6,7 @@ import { CodeExample } from '@/components/code-example';
 
 // This will fetch from our cached API route
 async function fetchApiData() {
+  "use cache";
   try {
     const response = await fetch('http://localhost:3001/api/demos/cached-data', {
       cache: 'force-cache', // Force caching of the API response

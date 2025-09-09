@@ -5,10 +5,11 @@ import { CacheRefreshButton } from '@/components/cache-refresh-button';
 import { CodeExample } from '@/components/code-example';
 import { CacheStatus } from '@/components/cache-status';
 
-// ISR with background revalidation
-export const revalidate = 30; // Revalidate every 30 seconds
+// ISR with background revalidation using "use cache" 
+// Note: export const revalidate is not compatible with experimental.cacheComponents
 
 async function getISRData() {
+  "use cache";
   // Simulate data fetching
   await new Promise(resolve => setTimeout(resolve, 150));
   

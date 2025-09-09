@@ -92,6 +92,72 @@ export async function GET() {
     ]
   },
   {
+    id: 'use-cache-directive',
+    name: '"use cache" Directive',
+    type: 'page',
+    description: 'Next.js 15\'s newest caching directive for route and component-level caching.',
+    betaFeature: true,
+    demoPath: '/demos/use-cache-directive',
+    codeExample: `'use cache'
+
+import { unstable_cacheLife as cacheLife } from 'next/cache';
+
+export default async function MyPage() {
+  cacheLife('hours'); // Built-in cache profiles
+  
+  const data = await expensiveOperation();
+  return <div>{data}</div>;
+}`,
+    benefits: [
+      'Future replacement for unstable_cache',
+      'Built-in cache profiles',
+      'Route-level caching',
+      'Automatic serialization',
+      'Nested caching support'
+    ],
+    useCases: [
+      'Entire page caching',
+      'Component-level caching',
+      'Function caching',
+      'API routes',
+      'Static content'
+    ]
+  },
+  {
+    id: 'cache-tags',
+    name: 'Cache Tags & Selective Revalidation',
+    type: 'function',
+    description: 'Use cache tags for fine-grained cache invalidation with revalidateTag().',
+    betaFeature: true,
+    demoPath: '/demos/cache-tags',
+    codeExample: `'use cache'
+
+import { unstable_cacheTag as cacheTag, revalidateTag } from 'next/cache';
+
+async function getUserData() {
+  'use cache'
+  cacheTag('user-data');
+  return await fetchUserData();
+}
+
+// Selectively revalidate only user data
+await revalidateTag('user-data');`,
+    benefits: [
+      'Selective cache invalidation',
+      'Fine-grained control',
+      'Performance optimization',
+      'Logical data grouping',
+      'On-demand revalidation'
+    ],
+    useCases: [
+      'User-specific data',
+      'Content management',
+      'E-commerce catalogs',
+      'Real-time updates',
+      'Multi-tenant apps'
+    ]
+  },
+  {
     id: 'function-cache',
     name: 'Function-Level Caching',
     type: 'function',

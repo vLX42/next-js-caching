@@ -5,9 +5,12 @@ import { CacheRefreshButton } from '@/components/cache-refresh-button';
 import { CodeExample } from '@/components/code-example';
 import { CacheStatus } from '@/components/cache-status';
 
-// Demonstrate different fetch caching strategies
-async function fetchWithCache() {
-  // This fetch will be cached by Next.js automatically
+// ⚠️ NEXT.JS 15 BREAKING CHANGE: fetch() is NO LONGER cached by default!
+// You must explicitly opt-in to caching behavior
+
+async function fetchWithOptInCache() {
+  "use cache";
+  // ✅ NEW: Explicitly opt-in to caching in Next.js 15
   const response = await fetch('https://jsonplaceholder.typicode.com/posts/1', {
     next: { 
       revalidate: 60, // Cache for 60 seconds
@@ -15,24 +18,34 @@ async function fetchWithCache() {
     }
   });
   
+  if (!response.ok) {
+    throw new Error('Failed to fetch data');
+  }
+  
   const data = await response.json();
   
   return {
     ...data,
     fetchedAt: new Date().toISOString(),
     cacheInfo: {
-      strategy: 'fetch-with-revalidate',
+      strategy: 'explicit-cache-opt-in',
       revalidateAfter: 60,
-      tags: ['posts']
+      tags: ['posts'],
+      nextjs15Change: 'Explicit caching required'
     }
   };
 }
 
 async function fetchWithForceCache() {
-  // This demonstrates force-cache behavior
+  "use cache";
+  // ✅ Still works: force-cache for indefinite caching
   const response = await fetch('https://jsonplaceholder.typicode.com/posts/2', {
     cache: 'force-cache' // Cache indefinitely until manually invalidated
   });
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch data');
+  }
   
   const data = await response.json();
   
@@ -41,16 +54,19 @@ async function fetchWithForceCache() {
     fetchedAt: new Date().toISOString(),
     cacheInfo: {
       strategy: 'force-cache',
-      description: 'Cached indefinitely'
+      description: 'Cached indefinitely (still works in v15)'
     }
   };
 }
 
-async function fetchWithNoCache() {
-  // This demonstrates no-cache behavior
-  const response = await fetch('https://jsonplaceholder.typicode.com/posts/3', {
-    cache: 'no-cache' // Always fetch fresh data
-  });
+async function fetchWithDefaultBehavior() {
+  "use cache";
+  // ⚠️ NEW DEFAULT: This is now uncached by default in Next.js 15
+  const response = await fetch('https://jsonplaceholder.typicode.com/posts/3');
+  
+  if (!response.ok) {
+    throw new Error('Failed to fetch data');
+  }
   
   const data = await response.json();
   
@@ -58,8 +74,9 @@ async function fetchWithNoCache() {
     ...data,
     fetchedAt: new Date().toISOString(),
     cacheInfo: {
-      strategy: 'no-cache',
-      description: 'Always fresh data'
+      strategy: 'default-uncached',
+      description: 'NO CACHE by default in Next.js 15!',
+      nextjs15Change: true
     }
   };
 }
@@ -67,11 +84,11 @@ async function fetchWithNoCache() {
 export default async function FetchCacheDemo() {
   const method = getCachingMethodById('fetch-cache');
   
-  // Fetch with different caching strategies
-  const [cachedData, forceCachedData, noCacheData] = await Promise.all([
-    fetchWithCache(),
+  // Fetch with different caching strategies - showing Next.js 15 changes
+  const [cachedData, forceCachedData, uncachedData] = await Promise.all([
+    fetchWithOptInCache(),
     fetchWithForceCache(), 
-    fetchWithNoCache()
+    fetchWithDefaultBehavior()
   ]);
   
   if (!method) {
@@ -79,127 +96,175 @@ export default async function FetchCacheDemo() {
   }
 
   const performanceData = {
-    loadTime: 30, // Varies based on cache hits
-    cacheHitRate: 75,
-    dataSize: JSON.stringify(cachedData).length + JSON.stringify(forceCachedData).length + JSON.stringify(noCacheData).length,
-    revalidationTime: 60,
-    ttl: 60
+    metrics: {
+      loadTime: 30,
+      cacheHitRate: 75,
+      dataSize: JSON.stringify(cachedData).length + JSON.stringify(forceCachedData).length + JSON.stringify(uncachedData).length,
+      revalidationTime: 60,
+      ttl: 60
+    }
   };
 
+  const codeExample = `// ⚠️ NEXT.JS 15 BREAKING CHANGE: fetch() is NO LONGER cached by default!
+
+// ❌ OLD (v14): Automatically cached
+const response = await fetch('/api/data');
+
+// ✅ NEW (v15): Must explicitly opt-in to caching
+const cached = await fetch('/api/data', {
+  next: { revalidate: 60 } // Explicit caching required
+});
+
+// ✅ Still works: force-cache
+const permanent = await fetch('/api/data', {
+  cache: 'force-cache'
+});
+
+// ⚠️ NEW DEFAULT: Uncached by default
+const fresh = await fetch('/api/data'); // Always fresh in v15`;
+
   return (
-    <div className="container">
-      {/* Header */}
-      <div className="hero">
-        <h1>{method.name}</h1>
+    <div style={{ 
+      maxWidth: '1200px', 
+      margin: '0 auto', 
+      padding: '2rem',
+      fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif'
+    }}>
+      <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
+        <h1 style={{ 
+          fontSize: '2.5rem', 
+          fontWeight: '700', 
+          marginBottom: '1rem',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent'
+        }}>
+          🔄 {method.name}
+        </h1>
         <p>{method.description}</p>
-        <Link href="/" style={{ color: '#4f46e5', textDecoration: 'none' }}>
+        <div style={{ 
+          background: '#fef3c7', 
+          border: '1px solid #f59e0b',
+          borderRadius: '8px',
+          padding: '1rem',
+          marginTop: '1rem'
+        }}>
+          <strong>⚠️ Next.js 15 Breaking Change:</strong> fetch() is no longer cached by default! 
+          You must explicitly opt-in to caching behavior.
+        </div>
+        <Link href="/" style={{ color: '#4f46e5', textDecoration: 'none', marginTop: '1rem', display: 'inline-block' }}>
           ← Back to Showcase
         </Link>
       </div>
 
-      {/* Demo Content */}
-      <div className="section">
-        <h2>Live Demo</h2>
+      <CacheStatus 
+        endpoint="/api/demos/fetch-cache/status"
+        label="Fetch Cache Status"
+        method="fetch"
+      />
+
+      <div style={{ margin: '2rem 0' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#1e293b' }}>
+          🧪 Next.js 15 Fetch Behavior Comparison
+        </h2>
         
-        {/* Revalidate Strategy */}
-        <div className="method-card" style={{ marginBottom: '24px' }}>
-          <h3>Fetch with Revalidate (60s)</h3>
-          <div style={{ 
-            background: '#f8fafc', 
-            padding: '16px', 
-            borderRadius: '8px', 
-            marginBottom: '16px',
-            fontFamily: 'monospace'
+        <div style={{ 
+          marginBottom: '24px', 
+          background: '#ecfdf5', 
+          border: '1px solid #10b981',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <h3 style={{ marginTop: 0, color: '#1e293b' }}>✅ Explicit Cache Opt-in (Recommended)</h3>
+          <pre style={{ 
+            background: '#f9fafb', 
+            padding: '1rem', 
+            borderRadius: '8px',
+            overflow: 'auto',
+            fontSize: '0.875rem'
           }}>
-            <div><strong>Title:</strong> {cachedData.title}</div>
-            <div><strong>User ID:</strong> {cachedData.userId}</div>
-            <div><strong>Fetched At:</strong> {cachedData.fetchedAt}</div>
-            <div><strong>Strategy:</strong> {cachedData.cacheInfo.strategy}</div>
-            <div><strong>Revalidate After:</strong> {cachedData.cacheInfo.revalidateAfter}s</div>
-          </div>
+            {JSON.stringify(cachedData, null, 2)}
+          </pre>
+          <p style={{ color: '#065f46', marginTop: '1rem', fontWeight: '500' }}>
+            ✅ Cached for {cachedData.cacheInfo.revalidateAfter}s with explicit revalidate option
+          </p>
         </div>
 
-        {/* Force Cache Strategy */}
-        <div className="method-card" style={{ marginBottom: '24px' }}>
-          <h3>Force Cache (Indefinite)</h3>
-          <div style={{ 
-            background: '#f8fafc', 
-            padding: '16px', 
-            borderRadius: '8px', 
-            marginBottom: '16px',
-            fontFamily: 'monospace'
+        <div style={{ 
+          marginBottom: '24px', 
+          background: '#eff6ff', 
+          border: '1px solid #3b82f6',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <h3 style={{ marginTop: 0, color: '#1e293b' }}>🔒 Force Cache (Still Works)</h3>
+          <pre style={{ 
+            background: '#f9fafb', 
+            padding: '1rem', 
+            borderRadius: '8px',
+            overflow: 'auto',
+            fontSize: '0.875rem'
           }}>
-            <div><strong>Title:</strong> {forceCachedData.title}</div>
-            <div><strong>User ID:</strong> {forceCachedData.userId}</div>
-            <div><strong>Fetched At:</strong> {forceCachedData.fetchedAt}</div>
-            <div><strong>Strategy:</strong> {forceCachedData.cacheInfo.strategy}</div>
-            <div><strong>Description:</strong> {forceCachedData.cacheInfo.description}</div>
-          </div>
+            {JSON.stringify(forceCachedData, null, 2)}
+          </pre>
+          <p style={{ color: '#1d4ed8', marginTop: '1rem', fontWeight: '500' }}>
+            🔒 {forceCachedData.cacheInfo.description}
+          </p>
         </div>
 
-        {/* No Cache Strategy */}
-        <div className="method-card" style={{ marginBottom: '24px' }}>
-          <h3>No Cache (Always Fresh)</h3>
-          <div style={{ 
-            background: '#f8fafc', 
-            padding: '16px', 
-            borderRadius: '8px', 
-            marginBottom: '16px',
-            fontFamily: 'monospace'
+        <div style={{ 
+          marginBottom: '24px', 
+          background: '#fef2f2', 
+          border: '1px solid #ef4444',
+          borderRadius: '12px',
+          padding: '1.5rem',
+          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        }}>
+          <h3 style={{ marginTop: 0, color: '#1e293b' }}>⚠️ Default Behavior (No Cache)</h3>
+          <pre style={{ 
+            background: '#f9fafb', 
+            padding: '1rem', 
+            borderRadius: '8px',
+            overflow: 'auto',
+            fontSize: '0.875rem'
           }}>
-            <div><strong>Title:</strong> {noCacheData.title}</div>
-            <div><strong>User ID:</strong> {noCacheData.userId}</div>
-            <div><strong>Fetched At:</strong> {noCacheData.fetchedAt}</div>
-            <div><strong>Strategy:</strong> {noCacheData.cacheInfo.strategy}</div>
-            <div><strong>Description:</strong> {noCacheData.cacheInfo.description}</div>
-          </div>
+            {JSON.stringify(uncachedData, null, 2)}
+          </pre>
+          <p style={{ color: '#dc2626', marginTop: '1rem', fontWeight: '500' }}>
+            ⚠️ {uncachedData.cacheInfo.description}
+          </p>
         </div>
+      </div>
 
-        <p style={{ color: '#6b7280', fontSize: '0.9rem', marginBottom: '16px' }}>
-          Three different fetch caching strategies demonstrated above. Notice how the timestamps
-          and caching behavior differ based on the strategy used.
-        </p>
+      <PerformanceMetrics metrics={performanceData.metrics} />
 
+      <CodeExample 
+        code={codeExample}
+        language="typescript"
+      />
+
+      <div style={{ margin: '2rem 0' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#1e293b' }}>
+          🔄 Cache Management
+        </h2>
         <CacheRefreshButton methodId="fetch-cache" />
-        
-        <CacheStatus 
-          endpoint="/api/demos/fetch-cache"
-          label="Fetch Cache Status"
-          method="fetch()"
-        />
       </div>
 
-      {/* Performance Metrics */}
-      <div className="section">
-        <h2>Performance Metrics</h2>
-        <PerformanceMetrics metrics={performanceData} />
-      </div>
-
-      {/* Code Example */}
-      <div className="section">
-        <h2>Implementation</h2>
-        <CodeExample code={method.codeExample} language="typescript" />
-      </div>
-
-      {/* Benefits & Use Cases */}
-      <div className="getting-started">
-        <div className="getting-started-content">
-          <div>
-            <h3>Key Benefits</h3>
-            <ul>
-              {method.benefits.map((benefit, index) => (
-                <li key={index}>• {benefit}</li>
-              ))}
-            </ul>
-          </div>
-          <div>
-            <h3>Use Cases</h3>
-            <ul>
-              {method.useCases.map((useCase, index) => (
-                <li key={index}>• {useCase}</li>
-              ))}
-            </ul>
-          </div>
+      <div style={{ margin: '2rem 0' }}>
+        <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#1e293b' }}>
+          📚 Next.js 15 Migration Guide
+        </h2>
+        <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '1.5rem' }}>
+          <h4 style={{ marginTop: 0, color: '#1e293b' }}>🔄 Update Your fetch() Calls:</h4>
+          <ul style={{ lineHeight: '1.8', margin: '1rem 0', paddingLeft: '1.5rem' }}>
+            <li style={{ marginBottom: '0.5rem' }}>❌ <strong>Remove assumption</strong> that fetch() is cached by default</li>
+            <li style={{ marginBottom: '0.5rem' }}>✅ <strong>Add explicit caching</strong> with <code style={{ background: '#f1f5f9', padding: '0.2rem 0.4rem', borderRadius: '4px', fontSize: '0.875rem' }}>next: {`{ revalidate }`}</code></li>
+            <li style={{ marginBottom: '0.5rem' }}>✅ <strong>Use force-cache</strong> for permanent caching</li>
+            <li style={{ marginBottom: '0.5rem' }}>✅ <strong>Use no-cache</strong> for always-fresh data (new default)</li>
+            <li style={{ marginBottom: '0.5rem' }}>⚡ <strong>Performance impact</strong>: More network requests without explicit caching</li>
+          </ul>
         </div>
       </div>
     </div>

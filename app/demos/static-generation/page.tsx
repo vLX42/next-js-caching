@@ -4,10 +4,11 @@ import { PerformanceMetrics } from '@/components/performance-metrics';
 import { CacheRefreshButton } from '@/components/cache-refresh-button';
 import { CodeExample } from '@/components/code-example';
 
-// This demonstrates Static Generation with revalidation
-export const revalidate = 60; // Revalidate every 60 seconds
+// This demonstrates Static Generation with revalidation using "use cache"
+// Note: export const revalidate is not compatible with experimental.cacheComponents
 
 async function getStaticData() {
+  "use cache";
   // Simulate data fetching with some delay
   await new Promise(resolve => setTimeout(resolve, 100));
   

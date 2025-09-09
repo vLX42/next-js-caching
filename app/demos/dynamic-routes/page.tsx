@@ -12,6 +12,7 @@ const sampleRoutes = [
 ];
 
 async function getDynamicRouteData(routeId: string) {
+  "use cache";
   // Simulate fetching data based on route parameter
   await new Promise(resolve => setTimeout(resolve, 80));
   
